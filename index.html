@@ -226,3 +226,102 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Character Run and Jump</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; background: linear-gradient(#ffcc66, #ff9966); }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const roadY = canvas.height - 100;
+const characterImg = new Image();
+characterImg.src = 'character.png'; // Make sure this file is in the same folder
+
+let character = {
+  x: 100,
+  y: roadY - 100,
+  width: 80,
+  height: 80,
+  vy: 0,
+  gravity: 0.6,
+  jumpPower: -15,
+  isJumping: false
+};
+
+let keys = {};
+
+document.addEventListener('keydown', (e) => {
+  keys[e.code] = true;
+  if (e.code === 'Space' && !character.isJumping) {
+    character.vy = character.jumpPower;
+    character.isJumping = true;
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  keys[e.code] = false;
+});
+
+function drawBackground() {
+  // Draw road
+  ctx.fillStyle = '#333';
+  ctx.fillRect(0, roadY, canvas.width, 100);
+  // Draw road lines
+  ctx.strokeStyle = '#fff';
+  ctx.setLineDash([30, 20]);
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(0, roadY + 50);
+  ctx.lineTo(canvas.width, roadY + 50);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawCharacter() {
+  ctx.drawImage(characterImg, character.x, character.y, character.width, character.height);
+}
+
+function updateCharacter() {
+  if (keys['ArrowRight']) {
+    character.x += 5;
+  }
+
+  character.y += character.vy;
+  character.vy += character.gravity;
+
+  // Ground collision
+  if (character.y > roadY - character.height) {
+    character.y = roadY - character.height;
+    character.vy = 0;
+    character.isJumping = false;
+  }
+}
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+  updateCharacter();
+  drawCharacter();
+  requestAnimationFrame(gameLoop);
+}
+
+characterImg.onload = () => {
+  gameLoop();
+};
+</script>
+</body>
+</html>
